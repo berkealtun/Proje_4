@@ -5,9 +5,16 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     
-    public float moveSpeed = 3f; // Hareket hızı
-    public float jumpForce = 5f; // Zıplama kuvveti
+     public float moveSpeed = 5f; // Hareket hızı
+    public float jumpForce = 10f; // Zıplama kuvveti
+    public int maxJumps = 2; // Maksimum zıplama sayısı
+    private int jumpsRemaining; // Kalan zıplama sayısı
     private bool isGrounded; // Yerde mi kontrolü için flag
+
+    void Start()
+    {
+        jumpsRemaining = maxJumps;
+    }
 
     void Update()
     {
@@ -20,8 +27,8 @@ public class PlayerMovement : MonoBehaviour
         // Nesnenin konumunu güncelle
         transform.position += movement * moveSpeed * Time.deltaTime;
 
-        // "Space" tuşuna basılıp basılmadığını kontrol et ve yerde mi kontrolü yap
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        // "Space" tuşuna basılıp basılmadığını kontrol et ve yerde veya double jump hakkı var mı kontrol et
+        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || jumpsRemaining > 0))
         {
             Jump();
         }
@@ -30,7 +37,14 @@ public class PlayerMovement : MonoBehaviour
     void Jump()
     {
         // Zıplama kuvvetini uygula
-        GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+        GetComponent<Rigidbody2D>().velocity = new Vector2(0f, jumpForce);
+        jumpsRemaining--;
+
+        // Eğer hala double jump hakkı varsa, hakkı güncelle
+        if (jumpsRemaining == 0)
+        {
+            isGrounded = false;
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -39,15 +53,7 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
-        }
-    }
-
-    void OnCollisionExit2D(Collision2D collision)
-    {
-        // Yerden ayrıldığını kontrol et
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
+            jumpsRemaining = maxJumps;
         }
     }
 }
