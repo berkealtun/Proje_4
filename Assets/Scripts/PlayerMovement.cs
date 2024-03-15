@@ -4,13 +4,17 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    
+    public float pistonJumpForce = 10f; // Piston zıplama kuvveti
  public float moveSpeed = 5f; // Hareket hızı
     public float jumpForce = 10f; // Zıplama kuvveti
     public int maxJumps = 2; // Maksimum zıplama sayısı
     private int jumpsRemaining; // Kalan zıplama sayısı
     private bool isGrounded; // Yerde mi kontrolü için flag
     private bool isWallSliding; // Duvara kayma kontrolü için flag
+    public float dashForce = 30f; // Dash kuvveti
+public float dashDuration = 0.05f; // Dash süresi
+private bool isDashing = false; // Dash yapılıyor mu kontrolü için flag
+private float dashTimer = 0f; // Dash süresi sayacı
     private Rigidbody2D rb; // Rigidbody bileşeni referansı
 
     void Start()
@@ -42,7 +46,29 @@ public class PlayerMovement : MonoBehaviour
                 WallJump();
             }
         }
+            // Dash input kontrolü
+    if (Input.GetKeyDown(KeyCode.LeftShift) && !isDashing)
+    {
+        StartCoroutine(Dash());
     }
+
+    }
+    IEnumerator Dash()
+{
+    isDashing = true;
+    rb.velocity = new Vector2(rb.velocity.x + (dashForce * Mathf.Sign(rb.velocity.x)), rb.velocity.y); // Dash kuvvetini uygula
+
+    // Dash süresi boyunca beklet
+    while (dashTimer < dashDuration)
+    {
+        dashTimer += Time.deltaTime;
+        yield return null;
+    }
+
+    // Dash bitince flag ve sayaçları sıfırla
+    isDashing = false;
+    dashTimer = 0f;
+}
 
    void Jump()
 {
@@ -82,6 +108,11 @@ public class PlayerMovement : MonoBehaviour
         {
             isWallSliding = true;
         }
+
+        if (collision.gameObject.CompareTag("Piston")) // Pistona temas ettiğinde
+        {
+            rb.velocity = new Vector2(rb.velocity.x, pistonJumpForce); // Yükseklik yönünde zıplama
+        }
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -92,4 +123,7 @@ public class PlayerMovement : MonoBehaviour
             isWallSliding = false;
         }
     }
+
+
+
 }
