@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isDashing = false;
     private float dashTimer = 0f;
     private Rigidbody2D rb;
+    private Animator animator;
 
     private PlayerInputs playerInputs; // Yeni giriş sistemi tanımı.
 
@@ -29,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
     {
         jumpsRemaining = maxJumps;
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     void OnEnable()
@@ -45,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        animator.SetBool("isIdle", true);
         // Klavye girişlerini alma yerine yeni giriş sistemini kullan.
 
         // Yeni giriş sisteminden "Move" eyleminin değerlerini al.
